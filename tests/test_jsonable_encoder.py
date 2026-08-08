@@ -202,6 +202,26 @@ def test_encode_model_with_default():
     }
 
 
+def test_encode_exclude_defaults_in_nested_containers():
+    model = ModelWithDefault(foo="foo", bar="bar")
+    non_default = ModelWithDefault(foo="foo", bar="custom", bla="custom")
+
+    assert jsonable_encoder([model], exclude_defaults=True) == [{"foo": "foo"}]
+    assert jsonable_encoder({"item": model}, exclude_defaults=True) == {
+        "item": {"foo": "foo"}
+    }
+    assert jsonable_encoder(
+        {"items": [model], "map": {"a": model}},
+        exclude_defaults=True,
+    ) == {"items": [{"foo": "foo"}], "map": {"a": {"foo": "foo"}}}
+    assert jsonable_encoder({"item": non_default}, exclude_defaults=True) == {
+        "item": {"foo": "foo", "bar": "custom", "bla": "custom"}
+    }
+    assert jsonable_encoder({"item": model}) == {
+        "item": {"foo": "foo", "bar": "bar", "bla": "bla"}
+    }
+
+
 def test_custom_encoders():
     class safe_datetime(datetime):
         pass
