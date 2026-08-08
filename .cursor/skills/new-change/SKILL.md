@@ -32,28 +32,33 @@ User pastes an issue URL or `#N` reference, for example:
 
 Then:
 
-1. Fetch the issue with the GitHub CLI when available (`gh issue view <n> --json number,title,body,labels,assignees,url` or the full URL).
-2. Map issue fields into request params:
+1. For `#N` references:
+   - Determine the repository from the current Git remote.
+   - Resolve `#N` against that repository.
+   - Record the resolved repository and issue URL in the PLAN.
+   - If the repository cannot be determined reliably, report the problem instead of guessing.
+2. Retrieve the issue from GitHub using an approved available tool. Prefer the GitHub CLI when it is configured for the current repository.
+   - Example: `gh issue view <n> --json number,title,body,labels,assignees,url`
+   - Do not make the Skill dependent on `gh` being installed.
+3. Map issue fields into request params:
    - **Goal** ← title (+ short summary of body)
    - **Constraints / acceptance** ← body checklists, “Acceptance criteria”, “Requirements”, or equivalent sections when present
    - **Out of scope** ← explicit “Out of scope” / “Non-goals” sections when present
    - **Change type hint** ← labels such as `bug`, `enhancement`, `documentation` when present (still re-classify per `01-change-isolation`)
    - **Source** ← issue URL/number (carry through PLAN and FINAL HANDOFF)
-3. If the issue cannot be fetched (auth, wrong repo, missing issue), stop and report what failed; do not invent issue content.
+4. If the issue cannot be fetched (auth, wrong repo, missing issue), stop and report what failed; do not invent issue content.
 
 ### B) Explicit params
 
-User defines the change directly (chat text or structured fields). Normalize into:
+Normalize direct user input into:
 
-| Param | Required | Meaning |
-| --- | --- | --- |
-| `goal` | yes | What to achieve |
-| `impact` | no | User/business why |
-| `change_type` | no | Hint only; still classify per repo/`01-change-isolation` |
-| `constraints` | no | Must-haves / acceptance criteria |
-| `out_of_scope` | no | Explicit exclusions |
-| `acceptance` | no | How success will be judged |
-| `source` | no | Issue URL/`#N` if this supplements a link |
+- `goal` — required — what should be achieved
+- `impact` — optional — user/business reason
+- `change_type` — optional hint; still classify using repository conventions
+- `constraints` — optional — must-haves and requirements
+- `out_of_scope` — optional — explicit exclusions
+- `acceptance` — optional — how success will be judged
+- `source` — optional — issue URL, issue number, ticket ID, or other source reference
 
 If neither a usable issue nor a `goal` is available, ask for one of the two input forms before continuing.
 
@@ -92,7 +97,7 @@ Record what you found and what remains uncertain.
 
 - Locate relevant code, tests, docs, and CI.
 - Note public surfaces, failure modes, and adjacent callers.
-- Stop and ask only if missing context blocks a defensible plan.
+- If context is incomplete, make safe repository-grounded assumptions when possible and record them under Risks / uncertainties. Ask only when the missing information would materially alter the implementation or create meaningful risk.
 
 
 
@@ -102,6 +107,7 @@ Emit the plan **before any implementation edits**, using this exact structure:
 
 ```markdown
 ## PLAN
+- Source:
 - Goal:
 - User/business impact:
 - Change type:
@@ -152,6 +158,8 @@ Emit the handoff using this exact structure:
 
 ```markdown
 ## FINAL HANDOFF
+- Source:
+
 ### Developer
 - What changed / where / why:
 - Follow-ups / debt:
@@ -177,4 +185,5 @@ Emit the handoff using this exact structure:
 
 - If uncertainty remains after discovery, state it in PLAN and handoff rather than guessing.
 - Keep the skill procedural; put lasting policy in Project Rules, not here.
+- Project Rules define non-negotiable policy. This Skill owns task ingestion, normalization, SDLC orchestration, and structured outputs. Do not duplicate Project Rule content unnecessarily. Do not add FastAPI-specific implementation knowledge.
 
