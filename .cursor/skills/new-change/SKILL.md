@@ -1,6 +1,6 @@
 ---
 name: new-change
-description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior; pastes a GitHub issue URL; supplies explicit change params; or invokes /new-change.
+description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, obtain explicit user approval, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior; pastes a GitHub issue URL; supplies explicit change params; or invokes /new-change.
 ---
 
 # Engineering Change
@@ -11,7 +11,7 @@ Project Rules define non-negotiable policy. This Skill defines the procedure for
 
 Treat the current repository as the source of truth for conventions. Do not hardcode FastAPI-specific implementation knowledge.
 
-Do not begin implementation until repository discovery and the implementation plan are complete.
+Do not begin implementation until repository discovery and the implementation plan are complete, **and the user has explicitly approved proceeding**.
 
 Prefer the smallest defensible change and explicitly report uncertainty rather than guessing.
 
@@ -77,7 +77,9 @@ Execute in order. Do not skip ahead.
 
 ### 2. Establish safe Git context
 
-- Follow Project Rule `01-change-isolation` before modifying files (inspect status/branch, classify type, create/checkout a dedicated branch).
+- Follow Project Rule `01-change-isolation` before modifying files (inspect status/branch, classify type).
+- Decide the intended dedicated branch name using repository conventions.
+- Defer creating/checking out that branch until after the user approves the PLAN (still create it before any implementation edits).
 
 
 
@@ -121,38 +123,48 @@ Emit the plan **before any implementation edits**, using this exact structure:
 - Risks / uncertainties:
 ```
 
-Do not begin implementation until this plan is complete.
+Do not begin implementation until this plan is complete **and the user has approved it**.
 
-### 6. Implement the smallest defensible change
+### 6. Confirm with the user (required checkpoint)
 
+After emitting the PLAN, **stop and ask the user whether to proceed** with implementation.
+
+- Ask clearly (for example: whether to proceed as planned, revise the plan, or abort).
+- Do not create the implementation branch, edit files, run mutating commands, commit, or open a PR until the user explicitly approves proceeding.
+- If the user requests plan changes, update the PLAN, re-emit it, and ask again.
+- If the user declines or aborts, stop without implementing and record that outcome briefly.
+
+### 7. Implement the smallest defensible change
+
+- Only after explicit user approval from step 6: create/checkout the dedicated branch (per step 2 / `01-change-isolation`), then implement.
 - Follow Project Rule `00-operating-model` for implementation scope.
 - Change only what the plan requires.
 - Follow Project Rule `02-documentation-updates` when documented behavior/APIs/examples are impacted.
 
 
 
-### 7. Strengthen tests
+### 8. Strengthen tests
 
 - Add or update tests that would have failed before the change.
 - Prefer the repository’s existing test entrypoints and patterns.
 
 
 
-### 8. Validate against repository guardrails
+### 9. Validate against repository guardrails
 
 - Run the lint/type/test/docs checks the repository already defines for this kind of change.
 - Fix failures you introduced; do not weaken guards to land the change.
 
 
 
-### 9. Review the final diff
+### 10. Review the final diff
 
 - Re-read the diff for correctness, scope creep, missing tests/docs, and secret leakage.
 - Confirm it matches the plan and Project Rules.
 
 
 
-### 10. Produce FINAL HANDOFF (required checkpoint)
+### 11. Produce FINAL HANDOFF (required checkpoint)
 
 Emit the handoff using this exact structure:
 
@@ -184,6 +196,7 @@ Emit the handoff using this exact structure:
 ## Notes
 
 - If uncertainty remains after discovery, state it in PLAN and handoff rather than guessing.
+- Never skip the post-PLAN confirmation checkpoint; approval must be explicit before implementation.
 - Keep the skill procedural; put lasting policy in Project Rules, not here.
 - Project Rules define non-negotiable policy. This Skill owns task ingestion, normalization, SDLC orchestration, and structured outputs. Do not duplicate Project Rule content unnecessarily. Do not add FastAPI-specific implementation knowledge.
 
