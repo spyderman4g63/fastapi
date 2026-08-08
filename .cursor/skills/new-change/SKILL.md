@@ -135,18 +135,28 @@ Do not begin implementation until this plan is complete.
 
 - Add or update tests that would have failed before the change.
 - Prefer the repository’s existing test entrypoints and patterns.
+- After running tests, **report results to the user** before continuing:
+  - commands run
+  - passed counts / suites
+  - failed tests (names + short error summary)
+  - skipped/xfailed only if relevant
+- **If any test fails: stop.** Do not continue to broader validation, review, handoff, commit, or PR. Ask the user what to do next (fix, extend scope, accept failure, abort, etc.).
+- Do not weaken, delete, or skip failing tests to proceed unless the user explicitly directs that.
 
 
 
 ### 8. Validate against repository guardrails
 
 - Run the lint/type/test/docs checks the repository already defines for this kind of change.
-- Fix failures you introduced; do not weaken guards to land the change.
+- Report pass/fail outcomes to the user the same way as tests (commands + results).
+- **If any required guardrail fails: stop** and ask the user what to do next. Do not continue the workflow until they decide.
+- Do not weaken guards to land the change unless the user explicitly directs that.
 
 
 
 ### 9. Review the final diff
 
+- Only proceed here after reported test and guardrail runs have passed (or the user explicitly waived a failure).
 - Re-read the diff for correctness, scope creep, missing tests/docs, and secret leakage.
 - Confirm it matches the plan and Project Rules.
 
@@ -165,6 +175,9 @@ Emit the handoff using this exact structure:
 - Follow-ups / debt:
 
 ### QA
+- Tests run:
+- Passed:
+- Failed:
 - How to verify:
 - Cases worth exercising:
 - Known gaps:
@@ -178,6 +191,8 @@ Emit the handoff using this exact structure:
 - Status:
 - Residual risk:
 ```
+
+`Tests run` / `Passed` / `Failed` must reflect the actual commands and outcomes from steps 7–8 (use `Failed: none` when clean).
 
 
 
