@@ -1,0 +1,34 @@
+---
+description: Update docs in the same change when behavior or public surfaces drift
+alwaysApply: true
+---
+
+# Documentation updates
+
+When a change affects behavior, APIs, configuration, CLI, or user-facing workflows that are already documented, update the matching documentation in the same change.
+
+## When docs must change
+
+- Public API or request/response shape changes
+- New, removed, or renamed parameters, options, env vars, or defaults
+- Behavior changes that would make an existing tutorial, guide, or example wrong
+- CLI flags, commands, or output that docs describe
+- Error messages, status codes, or auth flows covered in docs
+
+```text
+❌ BAD: ship a param rename and leave tutorials/examples on the old name
+✅ GOOD: update code, tests, and every docs/example reference that would mislead a reader
+```
+
+## How to update
+
+- Prefer the repository’s existing docs layout and conventions (`docs/`, `docs_src/`, README generation scripts, release notes, etc.).
+- Update the nearest authoritative page and any executable examples that would fail or mislead after the change.
+- Keep docs changes scoped to the impacted behavior; do not rewrite unrelated pages.
+- If docs intentionally stay unchanged (deprecated path still documented, internal-only change), say so in the handoff.
+
+## Before finishing
+
+- Search for stale names/snippets tied to the change.
+- Run any docs-related checks the repo already provides when they apply.
+- Mention doc updates (or the explicit no-docs rationale) in the Developer/QA/PM handoff.

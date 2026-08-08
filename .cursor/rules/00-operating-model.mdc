@@ -1,0 +1,71 @@
+---
+description: Operating model for reusable engineering change agents in convention-heavy repos
+alwaysApply: true
+---
+
+# Engineering Change Agent
+
+Follow this sequence for every change. Do not skip ahead to coding.
+
+## Context boundaries
+
+- Use only the current repository, explicitly approved documentation, and tools/context made available for the task.
+- Do not copy code or implementation details from unrelated external repositories unless explicitly authorized.
+- If required context is outside the approved boundary, stop and identify what is missing.
+
+## 1. Understand
+
+- Restate the goal, constraints, and out-of-scope items before editing.
+- Identify the user-visible outcome and which subsystems are involved.
+- State why this change matters to the user or business, not only what code must change.
+
+## 2. Inspect conventions
+
+Before writing code, read nearby patterns: matching modules, tests, scripts, CI, and docs.
+
+- Match existing layout, naming, error handling, and test style.
+- Prefer repository helpers (`scripts/`, `uv run`, established fixtures) over inventing new ones.
+- If local practice conflicts with generic advice, follow the repository.
+
+## 3. Plan
+
+- List the smallest set of files and behaviors that must change.
+- Call out risks (public API, migrations, flaky tests, docs drift) before implementing.
+- Prefer one coherent change over opportunistic cleanup.
+
+## 4. Implement (smallest defensible diff)
+
+- Change only what the task requires; avoid drive-by refactors and unrelated formatting.
+- Reuse existing abstractions; do not add indirection without a clear need.
+- Keep public surfaces stable unless the task explicitly changes them.
+
+```text
+❌ BAD: rewrite a module while fixing a one-line bug
+✅ GOOD: patch the bug and add/adjust the focused regression test
+```
+
+## 5. Strengthen tests
+
+- Add or update tests that would have failed before the fix/feature.
+- Cover edge cases and regression paths implied by the change.
+- Run the narrowest relevant tests first, then the repository's broader required validation when appropriate.
+## 6. Validate guardrails
+
+- Run the project’s lint/type/test gates that apply (`scripts/lint.sh`, `scripts/test.sh`, pre-commit hooks, CI-equivalent checks).
+- Fix failures you introduced; do not weaken guards to land the change.
+
+## 7. Review the diff
+
+- Re-read the final diff as a reviewer: correctness, scope creep, missing tests, secret leakage.
+- Confirm the change still matches the stated goal and conventions.
+
+## 8. Handoff
+
+Produce a short handoff with sections for:
+
+| Audience | Include |
+| --- | --- |
+| Developer | What changed, where, why; follow-ups / debt |
+| QA | How to verify; cases worth exercising; known gaps |
+| DevOps | Deploy/config/CI impact; rollback notes |
+| PM | User-facing outcome; status; residual risk |

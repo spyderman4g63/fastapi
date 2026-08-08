@@ -1,0 +1,39 @@
+# Extends .gitignore: Cursor already skips gitignored paths for indexing.
+# Patterns here additionally exclude files from Cursor AI context.
+
+# Local environments / secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Caches and tooling artifacts
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.cache/
+.codspeed/
+__pycache__/
+*.py[cod]
+
+# Coverage / build / generated sites
+htmlcov/
+coverage/
+.coverage*
+coverage.xml
+dist/
+site/
+site_build/
+site_zensical_src/
+docs_build/
+docs.zip
+archive.zip
+
+# Editor / OS noise
+.idea/
+.vscode/
+.DS_Store
+*~
+.*.sw?
