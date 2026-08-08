@@ -1,6 +1,6 @@
 ---
 name: new-change
-description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior, or when they invoke /new-change.
+description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior; pastes a GitHub issue URL; supplies explicit change params; or invokes /new-change.
 ---
 
 # Engineering Change
@@ -19,13 +19,52 @@ Prefer the smallest defensible change and explicitly report uncertainty rather t
 
 Apply for scoped engineering changes (fix, feat, enhancement, refactor, docs, test, chore). Defer to Project Rules for policy; this skill only sequences the work and required outputs.
 
+## Inputs
+
+Accept **either** of these invocation forms (or both, with explicit params overriding the issue where they conflict):
+
+### A) GitHub issue link
+
+User pastes an issue URL or `#N` reference, for example:
+
+- `https://github.com/<owner>/<repo>/issues/<n>`
+- `#<n>` (resolved against the current repository)
+
+Then:
+
+1. Fetch the issue with the GitHub CLI when available (`gh issue view <n> --json number,title,body,labels,assignees,url` or the full URL).
+2. Map issue fields into request params:
+   - **Goal** ← title (+ short summary of body)
+   - **Constraints / acceptance** ← body checklists, “Acceptance criteria”, “Requirements”, or equivalent sections when present
+   - **Out of scope** ← explicit “Out of scope” / “Non-goals” sections when present
+   - **Change type hint** ← labels such as `bug`, `enhancement`, `documentation` when present (still re-classify per `01-change-isolation`)
+   - **Source** ← issue URL/number (carry through PLAN and FINAL HANDOFF)
+3. If the issue cannot be fetched (auth, wrong repo, missing issue), stop and report what failed; do not invent issue content.
+
+### B) Explicit params
+
+User defines the change directly (chat text or structured fields). Normalize into:
+
+| Param | Required | Meaning |
+| --- | --- | --- |
+| `goal` | yes | What to achieve |
+| `impact` | no | User/business why |
+| `change_type` | no | Hint only; still classify per repo/`01-change-isolation` |
+| `constraints` | no | Must-haves / acceptance criteria |
+| `out_of_scope` | no | Explicit exclusions |
+| `acceptance` | no | How success will be judged |
+| `source` | no | Issue URL/`#N` if this supplements a link |
+
+If neither a usable issue nor a `goal` is available, ask for one of the two input forms before continuing.
+
 ## Workflow
 
 Execute in order. Do not skip ahead.
 
 ### 1. Understand the request
 
-- Restate goal, constraints, and out of scope.
+- Resolve inputs using **Inputs** above (issue link and/or explicit params).
+- Restate goal, constraints, and out of scope (cite `source` when from an issue).
 - Identify user/business impact and likely subsystems.
 - Follow Project Rule `00-operating-model` for context boundaries and understanding requirements.
 
