@@ -1,6 +1,6 @@
 ---
 name: new-change
-description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior; pastes a GitHub issue URL; supplies explicit change params; or invokes /new-change.
+description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior; pastes a GitHub issue URL or issue number; supplies explicit change params; or invokes /new-change.
 ---
 
 # Engineering Change
@@ -23,30 +23,32 @@ Apply for scoped engineering changes (fix, feat, enhancement, refactor, docs, te
 
 Accept **either** of these invocation forms (or both, with explicit params overriding the issue where they conflict):
 
-### A) GitHub issue link
+### A) GitHub issue link or issue number
 
-User pastes an issue URL or `#N` reference, for example:
+User provides a GitHub issue as either a full URL or an issue number, for example:
 
-- `https://github.com/<owner>/<repo>/issues/<n>`
-- `#<n>` (resolved against the current repository)
+- `https://github.com/<owner>/<repo>/issues/<n>` (full link)
+- `<n>` or `#<n>` (issue number; resolved against the current repository)
 
 Then:
 
-1. For `#N` references:
+1. If the input is an issue number (`<n>` or `#<n>`), not a full URL:
    - Determine the repository from the current Git remote.
-   - Resolve `#N` against that repository.
+   - Resolve the number against that repository.
    - Record the resolved repository and issue URL in the PLAN.
    - If the repository cannot be determined reliably, report the problem instead of guessing.
-2. Retrieve the issue from GitHub using an approved available tool. Prefer the GitHub CLI when it is configured for the current repository.
+2. If the input is a full issue URL, use that URL/repository directly and record it in the PLAN.
+3. Retrieve the issue from GitHub using an approved available tool. Prefer the GitHub CLI when it is configured for the current repository.
    - Example: `gh issue view <n> --json number,title,body,labels,assignees,url`
+   - Example: `gh issue view <url> --json number,title,body,labels,assignees,url`
    - Do not make the Skill dependent on `gh` being installed.
-3. Map issue fields into request params:
+4. Map issue fields into request params:
    - **Goal** ← title (+ short summary of body)
    - **Constraints / acceptance** ← body checklists, “Acceptance criteria”, “Requirements”, or equivalent sections when present
    - **Out of scope** ← explicit “Out of scope” / “Non-goals” sections when present
    - **Change type hint** ← labels such as `bug`, `enhancement`, `documentation` when present (still re-classify per `01-change-isolation`)
    - **Source** ← issue URL/number (carry through PLAN and FINAL HANDOFF)
-4. If the issue cannot be fetched (auth, wrong repo, missing issue), stop and report what failed; do not invent issue content.
+5. If the issue cannot be fetched (auth, wrong repo, missing issue), stop and report what failed; do not invent issue content.
 
 ### B) Explicit params
 
@@ -60,7 +62,7 @@ Normalize direct user input into:
 - `acceptance` — optional — how success will be judged
 - `source` — optional — issue URL, issue number, ticket ID, or other source reference
 
-If neither a usable issue nor a `goal` is available, ask for one of the two input forms before continuing.
+If neither a usable issue (link or number) nor a `goal` is available, ask for one of the two input forms before continuing.
 
 ## Workflow
 
@@ -68,7 +70,7 @@ Execute in order. Do not skip ahead.
 
 ### 1. Understand the request
 
-- Resolve inputs using **Inputs** above (issue link and/or explicit params).
+- Resolve inputs using **Inputs** above (issue link, issue number, and/or explicit params).
 - Restate goal, constraints, and out of scope (cite `source` when from an issue).
 - Identify user/business impact and likely subsystems.
 - Follow Project Rule `00-operating-model` for context boundaries and understanding requirements.
