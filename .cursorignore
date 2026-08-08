@@ -1,5 +1,5 @@
 # Extends .gitignore: Cursor already skips gitignored paths for indexing.
-# Patterns here additionally keep files out of model context (Agent, Tab, @).
+# Patterns here additionally exclude files from Cursor AI context.
 
 # Local environments / secrets
 .venv/
@@ -18,7 +18,7 @@ env/
 __pycache__/
 *.py[cod]
 
-# Coverage / build / generated sites (high noise, low signal for coding agents)
+# Coverage / build / generated sites
 htmlcov/
 coverage/
 .coverage*
@@ -30,9 +30,6 @@ site_zensical_src/
 docs_build/
 docs.zip
 archive.zip
-
-# Lockfiles are large and rarely useful in prompts
-uv.lock
 
 # Editor / OS noise
 .idea/
