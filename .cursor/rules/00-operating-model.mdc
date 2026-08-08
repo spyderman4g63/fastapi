@@ -48,8 +48,7 @@ Before writing code, read nearby patterns: matching modules, tests, scripts, CI,
 
 - Add or update tests that would have failed before the fix/feature.
 - Cover edge cases and regression paths implied by the change.
-- Run the repo’s relevant test entrypoints (e.g. `scripts/test.sh`), not ad-hoc one-offs, unless scoped otherwise.
-
+- Run the narrowest relevant tests first, then the repository's broader required validation when appropriate.
 ## 6. Validate guardrails
 
 - Run the project’s lint/type/test gates that apply (`scripts/lint.sh`, `scripts/test.sh`, pre-commit hooks, CI-equivalent checks).
