@@ -1,6 +1,6 @@
 ---
-name: engineering-change
-description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior, or when they invoke /engineering-change.
+name: new-change
+description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior, or when they invoke /new-change.
 ---
 
 # Engineering Change
@@ -29,9 +29,13 @@ Execute in order. Do not skip ahead.
 - Identify user/business impact and likely subsystems.
 - Follow Project Rule `00-operating-model` for context boundaries and understanding requirements.
 
+
+
 ### 2. Establish safe Git context
 
 - Follow Project Rule `01-change-isolation` before modifying files (inspect status/branch, classify type, create/checkout a dedicated branch).
+
+
 
 ### 3. Discover repository conventions
 
@@ -50,6 +54,8 @@ Record what you found and what remains uncertain.
 - Locate relevant code, tests, docs, and CI.
 - Note public surfaces, failure modes, and adjacent callers.
 - Stop and ask only if missing context blocks a defensible plan.
+
+
 
 ### 5. Produce PLAN (required checkpoint)
 
@@ -78,20 +84,28 @@ Do not begin implementation until this plan is complete.
 - Change only what the plan requires.
 - Follow Project Rule `02-documentation-updates` when documented behavior/APIs/examples are impacted.
 
+
+
 ### 7. Strengthen tests
 
 - Add or update tests that would have failed before the change.
 - Prefer the repository’s existing test entrypoints and patterns.
+
+
 
 ### 8. Validate against repository guardrails
 
 - Run the lint/type/test/docs checks the repository already defines for this kind of change.
 - Fix failures you introduced; do not weaken guards to land the change.
 
+
+
 ### 9. Review the final diff
 
 - Re-read the diff for correctness, scope creep, missing tests/docs, and secret leakage.
 - Confirm it matches the plan and Project Rules.
+
+
 
 ### 10. Produce FINAL HANDOFF (required checkpoint)
 
@@ -118,7 +132,10 @@ Emit the handoff using this exact structure:
 - Residual risk:
 ```
 
+
+
 ## Notes
 
 - If uncertainty remains after discovery, state it in PLAN and handoff rather than guessing.
 - Keep the skill procedural; put lasting policy in Project Rules, not here.
+
