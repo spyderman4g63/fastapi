@@ -1,0 +1,24 @@
+---
+description: Isolate each change on a dedicated typed branch before editing
+alwaysApply: true
+---
+
+# Change isolation
+
+Before editing:
+
+- Inspect the current Git status and current branch.
+- Classify the change type using the repository's conventions when available.
+- Use one of these generic types when the repository does not define its own:
+  - `fix` — bug fix
+  - `feat` — new user-facing capability
+  - `enhancement` — improvement to existing behavior
+  - `refactor` — internal change without intended behavior change
+  - `docs` — documentation-only change
+  - `test` — test-only change
+  - `chore` — maintenance/tooling change
+- Create and checkout a dedicated branch for the change before modifying files.
+- Prefer the repository's existing branch naming conventions when they can be discovered.
+- Otherwise use:
+  `<type>/<short-kebab-case-description>`
+- Do not make task-related changes directly on the repository's default branch.

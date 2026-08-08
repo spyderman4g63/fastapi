@@ -7,10 +7,17 @@ alwaysApply: true
 
 Follow this sequence for every change. Do not skip ahead to coding.
 
+## Context boundaries
+
+- Use only the current repository, explicitly approved documentation, and tools/context made available for the task.
+- Do not copy code or implementation details from unrelated external repositories unless explicitly authorized.
+- If required context is outside the approved boundary, stop and identify what is missing.
+
 ## 1. Understand
 
 - Restate the goal, constraints, and out-of-scope items before editing.
 - Identify the user-visible outcome and which subsystems are involved.
+- State why this change matters to the user or business, not only what code must change.
 
 ## 2. Inspect conventions
 
