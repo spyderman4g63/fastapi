@@ -11,7 +11,7 @@ Project Rules define non-negotiable policy. This Skill defines the procedure for
 
 Treat the current repository as the source of truth for conventions. Do not hardcode FastAPI-specific implementation knowledge.
 
-Do not begin implementation until repository discovery and the implementation plan are complete.
+Do not begin implementation until repository discovery and the implementation plan are complete, and the user has explicitly approved the PLAN.
 
 Prefer the smallest defensible change and explicitly report uncertainty rather than guessing.
 
