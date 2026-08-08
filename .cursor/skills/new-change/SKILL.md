@@ -121,10 +121,11 @@ Emit the plan **before any implementation edits**, using this exact structure:
 - Risks / uncertainties:
 ```
 
-Do not begin implementation until this plan is complete.
+After presenting the PLAN, **ask the user whether to proceed** with the proposed change. Do not begin implementation until they explicitly approve (e.g. proceed / yes / approved). If they decline or request changes, revise the PLAN or stop as they direct.
 
 ### 6. Implement the smallest defensible change
 
+- Only start this step after explicit user approval of the PLAN.
 - Follow Project Rule `00-operating-model` for implementation scope.
 - Change only what the plan requires.
 - Follow Project Rule `02-documentation-updates` when documented behavior/APIs/examples are impacted.
@@ -135,24 +136,38 @@ Do not begin implementation until this plan is complete.
 
 - Add or update tests that would have failed before the change.
 - Prefer the repository’s existing test entrypoints and patterns.
+- Run the relevant tests and **show the user the status** of what ran:
+  - commands
+  - passed (counts / suites)
+  - failed (test names + short error summary)
+  - use `Failed: none` when clean
+- **If any test fails: stop.** Do not continue to PR creation or FINAL HANDOFF as success. Tell the user tests are not passing, include the failure details, and **suggest a fix**. Ask what they want to do next. Do not weaken, delete, or skip failing tests unless they explicitly direct that.
 
 
 
 ### 8. Validate against repository guardrails
 
 - Run the lint/type/test/docs checks the repository already defines for this kind of change.
-- Fix failures you introduced; do not weaken guards to land the change.
+- Show the user pass/fail status the same way as tests (commands + results).
+- **If any required guardrail fails: stop**, report the failure, suggest a fix, and ask what to do next.
+- Do not weaken guards to land the change unless the user explicitly directs that.
 
 
 
 ### 9. Review the final diff
 
+- Only proceed here after reported tests and required guardrails have passed (or the user explicitly waived a failure).
 - Re-read the diff for correctness, scope creep, missing tests/docs, and secret leakage.
 - Confirm it matches the plan and Project Rules.
 
 
 
-### 10. Produce FINAL HANDOFF (required checkpoint)
+### 10. Open PR only when tests passed
+
+- **Create or update a PR only if all required tests and guardrails reported in steps 7–8 passed.**
+- If anything failed and was not explicitly waived by the user, do not open/update a PR.
+
+### 11. Produce FINAL HANDOFF (required checkpoint)
 
 Emit the handoff using this exact structure:
 
@@ -165,6 +180,9 @@ Emit the handoff using this exact structure:
 - Follow-ups / debt:
 
 ### QA
+- Tests run:
+- Passed:
+- Failed:
 - How to verify:
 - Cases worth exercising:
 - Known gaps:
@@ -178,6 +196,8 @@ Emit the handoff using this exact structure:
 - Status:
 - Residual risk:
 ```
+
+`Tests run` / `Passed` / `Failed` must reflect the actual commands and outcomes from steps 7–8 (use `Failed: none` when clean).
 
 
 
