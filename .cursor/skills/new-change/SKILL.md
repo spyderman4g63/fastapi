@@ -1,6 +1,6 @@
 ---
 name: new-change
-description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior; pastes a GitHub issue URL; supplies explicit change params; or invokes /new-change.
+description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior; pastes a GitHub issue URL or issue number; supplies explicit change params; or invokes /new-change.
 ---
 
 # Engineering Change
@@ -11,7 +11,7 @@ Project Rules define non-negotiable policy. This Skill defines the procedure for
 
 Treat the current repository as the source of truth for conventions. Do not hardcode FastAPI-specific implementation knowledge.
 
-Do not begin implementation until repository discovery and the implementation plan are complete.
+Do not begin implementation until repository discovery and the implementation plan are complete, and the user has explicitly approved the PLAN.
 
 Prefer the smallest defensible change and explicitly report uncertainty rather than guessing.
 
@@ -23,30 +23,32 @@ Apply for scoped engineering changes (fix, feat, enhancement, refactor, docs, te
 
 Accept **either** of these invocation forms (or both, with explicit params overriding the issue where they conflict):
 
-### A) GitHub issue link
+### A) GitHub issue link or issue number
 
-User pastes an issue URL or `#N` reference, for example:
+User provides a GitHub issue as either a full URL or an issue number, for example:
 
-- `https://github.com/<owner>/<repo>/issues/<n>`
-- `#<n>` (resolved against the current repository)
+- `https://github.com/<owner>/<repo>/issues/<n>` (full link)
+- `<n>` or `#<n>` (issue number; resolved against the current repository)
 
 Then:
 
-1. For `#N` references:
+1. If the input is an issue number (`<n>` or `#<n>`), not a full URL:
    - Determine the repository from the current Git remote.
-   - Resolve `#N` against that repository.
+   - Resolve the number against that repository.
    - Record the resolved repository and issue URL in the PLAN.
    - If the repository cannot be determined reliably, report the problem instead of guessing.
-2. Retrieve the issue from GitHub using an approved available tool. Prefer the GitHub CLI when it is configured for the current repository.
+2. If the input is a full issue URL, use that URL/repository directly and record it in the PLAN.
+3. Retrieve the issue from GitHub using an approved available tool. Prefer the GitHub CLI when it is configured for the current repository.
    - Example: `gh issue view <n> --json number,title,body,labels,assignees,url`
+   - Example: `gh issue view <url> --json number,title,body,labels,assignees,url`
    - Do not make the Skill dependent on `gh` being installed.
-3. Map issue fields into request params:
+4. Map issue fields into request params:
    - **Goal** ← title (+ short summary of body)
    - **Constraints / acceptance** ← body checklists, “Acceptance criteria”, “Requirements”, or equivalent sections when present
    - **Out of scope** ← explicit “Out of scope” / “Non-goals” sections when present
    - **Change type hint** ← labels such as `bug`, `enhancement`, `documentation` when present (still re-classify per `01-change-isolation`)
    - **Source** ← issue URL/number (carry through PLAN and FINAL HANDOFF)
-4. If the issue cannot be fetched (auth, wrong repo, missing issue), stop and report what failed; do not invent issue content.
+5. If the issue cannot be fetched (auth, wrong repo, missing issue), stop and report what failed; do not invent issue content.
 
 ### B) Explicit params
 
@@ -60,7 +62,7 @@ Normalize direct user input into:
 - `acceptance` — optional — how success will be judged
 - `source` — optional — issue URL, issue number, ticket ID, or other source reference
 
-If neither a usable issue nor a `goal` is available, ask for one of the two input forms before continuing.
+If neither a usable issue (link or number) nor a `goal` is available, ask for one of the two input forms before continuing.
 
 ## Workflow
 
@@ -68,7 +70,7 @@ Execute in order. Do not skip ahead.
 
 ### 1. Understand the request
 
-- Resolve inputs using **Inputs** above (issue link and/or explicit params).
+- Resolve inputs using **Inputs** above (issue link, issue number, and/or explicit params).
 - Restate goal, constraints, and out of scope (cite `source` when from an issue).
 - Identify user/business impact and likely subsystems.
 - Follow Project Rule `00-operating-model` for context boundaries and understanding requirements.
@@ -121,10 +123,11 @@ Emit the plan **before any implementation edits**, using this exact structure:
 - Risks / uncertainties:
 ```
 
-Do not begin implementation until this plan is complete.
+After presenting the PLAN, **ask the user whether to proceed** with the proposed change. Do not begin implementation until they explicitly approve (e.g. proceed / yes / approved). If they decline or request changes, revise the PLAN or stop as they direct.
 
 ### 6. Implement the smallest defensible change
 
+- Only start this step after explicit user approval of the PLAN.
 - Follow Project Rule `00-operating-model` for implementation scope.
 - Change only what the plan requires.
 - Follow Project Rule `02-documentation-updates` when documented behavior/APIs/examples are impacted.
@@ -135,24 +138,38 @@ Do not begin implementation until this plan is complete.
 
 - Add or update tests that would have failed before the change.
 - Prefer the repository’s existing test entrypoints and patterns.
+- Run the relevant tests and **show the user the status** of what ran:
+  - commands
+  - passed (counts / suites)
+  - failed (test names + short error summary)
+  - use `Failed: none` when clean
+- **If any test fails: stop.** Do not continue to PR creation or FINAL HANDOFF as success. Tell the user tests are not passing, include the failure details, and **suggest a fix**. Ask what they want to do next. Do not weaken, delete, or skip failing tests unless they explicitly direct that.
 
 
 
 ### 8. Validate against repository guardrails
 
 - Run the lint/type/test/docs checks the repository already defines for this kind of change.
-- Fix failures you introduced; do not weaken guards to land the change.
+- Show the user pass/fail status the same way as tests (commands + results).
+- **If any required guardrail fails: stop**, report the failure, suggest a fix, and ask what to do next.
+- Do not weaken guards to land the change unless the user explicitly directs that.
 
 
 
 ### 9. Review the final diff
 
+- Only proceed here after reported tests and required guardrails have passed (or the user explicitly waived a failure).
 - Re-read the diff for correctness, scope creep, missing tests/docs, and secret leakage.
 - Confirm it matches the plan and Project Rules.
 
 
 
-### 10. Produce FINAL HANDOFF (required checkpoint)
+### 10. Open PR only when tests passed
+
+- **Create or update a PR only if all required tests and guardrails reported in steps 7–8 passed.**
+- If anything failed and was not explicitly waived by the user, do not open/update a PR.
+
+### 11. Produce FINAL HANDOFF (required checkpoint)
 
 Emit the handoff using this exact structure:
 
@@ -165,6 +182,9 @@ Emit the handoff using this exact structure:
 - Follow-ups / debt:
 
 ### QA
+- Tests run:
+- Passed:
+- Failed:
 - How to verify:
 - Cases worth exercising:
 - Known gaps:
@@ -178,6 +198,8 @@ Emit the handoff using this exact structure:
 - Status:
 - Residual risk:
 ```
+
+`Tests run` / `Passed` / `Failed` must reflect the actual commands and outcomes from steps 7–8 (use `Failed: none` when clean).
 
 
 
