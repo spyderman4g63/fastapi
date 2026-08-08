@@ -1,6 +1,6 @@
 ---
 name: new-change
-description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, obtain explicit user approval, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior; pastes a GitHub issue URL; supplies explicit change params; or invokes /new-change.
+description: Run the full reusable engineering-change workflow for a scoped fix or feature in a convention-heavy repository—understand, isolate Git context, discover conventions, plan, obtain explicit user approval, implement the smallest defensible change, strengthen tests, validate guardrails, review the diff, publish only after validation passes, and produce a multi-role handoff. Use when the user asks to fix, implement, enhance, refactor, or otherwise change repository code/behavior; pastes a GitHub issue URL; supplies explicit change params; or invokes /new-change.
 ---
 
 # Engineering Change
@@ -130,7 +130,8 @@ Do not begin implementation until this plan is complete **and the user has appro
 After emitting the PLAN, **stop and ask the user whether to proceed** with implementation.
 
 - Ask clearly (for example: whether to proceed as planned, revise the plan, or abort).
-- Do not create the implementation branch, edit files, run mutating commands, commit, or open a PR until the user explicitly approves proceeding.
+- Do not create the implementation branch or edit files until the user explicitly approves proceeding.
+- Approval unlocks implementation only; commit/push/PR remain gated by successful validation (steps 8–11).
 - If the user requests plan changes, update the PLAN, re-emit it, and ask again.
 - If the user declines or aborts, stop without implementing and record that outcome briefly.
 
@@ -147,24 +148,42 @@ After emitting the PLAN, **stop and ask the user whether to proceed** with imple
 
 - Add or update tests that would have failed before the change.
 - Prefer the repository’s existing test entrypoints and patterns.
+- After running tests, **report results to the user** before continuing:
+  - commands run
+  - passed counts / suites
+  - failed tests (names + short error summary)
+  - skipped/xfailed only if relevant
+- **If any test fails: stop.** Do not continue to broader validation, review, handoff, commit, push, or PR. Ask the user what to do next (fix, extend scope, accept failure, abort, etc.).
+- Do not weaken, delete, or skip failing tests to proceed unless the user explicitly directs that.
 
 
 
 ### 9. Validate against repository guardrails
 
 - Run the lint/type/test/docs checks the repository already defines for this kind of change.
-- Fix failures you introduced; do not weaken guards to land the change.
+- Report pass/fail outcomes to the user the same way as tests (commands + results).
+- **If any required guardrail fails: stop** and ask the user what to do next. Do not continue the workflow until they decide.
+- Do not weaken guards to land the change unless the user explicitly directs that.
 
 
 
 ### 10. Review the final diff
 
+- Only proceed here after reported test and guardrail runs have passed (or the user explicitly waived a failure).
 - Re-read the diff for correctness, scope creep, missing tests/docs, and secret leakage.
 - Confirm it matches the plan and Project Rules.
 
 
 
-### 11. Produce FINAL HANDOFF (required checkpoint)
+### 11. Publish only after validation (required ordering)
+
+- **Do not `git commit`, `git push`, or open/update a PR until steps 8–10 are complete and required tests/guardrails have passed** (or the user explicitly waived a failure).
+- Local implementation edits may exist in the working tree before that; they must not be published early.
+- After validation and review succeed, then commit, push, and open/update the PR as appropriate for the task.
+
+
+
+### 12. Produce FINAL HANDOFF (required checkpoint)
 
 Emit the handoff using this exact structure:
 
@@ -177,6 +196,9 @@ Emit the handoff using this exact structure:
 - Follow-ups / debt:
 
 ### QA
+- Tests run:
+- Passed:
+- Failed:
 - How to verify:
 - Cases worth exercising:
 - Known gaps:
@@ -191,12 +213,15 @@ Emit the handoff using this exact structure:
 - Residual risk:
 ```
 
+`Tests run` / `Passed` / `Failed` must reflect the actual commands and outcomes from steps 8–9 (use `Failed: none` when clean; use `n/a` only when no repository test/guardrail applies to the change, and say why).
+
 
 
 ## Notes
 
 - If uncertainty remains after discovery, state it in PLAN and handoff rather than guessing.
 - Never skip the post-PLAN confirmation checkpoint; approval must be explicit before implementation.
+- Never publish (commit/push/PR) before required tests and guardrails have passed, unless the user explicitly waives a failure.
 - Keep the skill procedural; put lasting policy in Project Rules, not here.
 - Project Rules define non-negotiable policy. This Skill owns task ingestion, normalization, SDLC orchestration, and structured outputs. Do not duplicate Project Rule content unnecessarily. Do not add FastAPI-specific implementation knowledge.
 
